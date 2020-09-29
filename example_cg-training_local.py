@@ -1,6 +1,5 @@
 import sys
 from sys import stdout
-sys.path.append('/Users/michaelma/rush/recommender')
 
 from dataclasses import dataclass
 from typing import List
@@ -23,12 +22,13 @@ from modelling.evaluation import *
 
 # load cloud storage, configure training and validation matrices
 stdout.write('DEBUG: Reading data from local storage ...\n')
-cg_storage = ModelStorage(bucket_name='recommender-amazon-1', model_path='models/luxury-beauty/candidate-generation')
+cg_storage = ModelStorage(bucket_name='recommender-amazon-1', model_path='models/luxury-beauty/candidate-generation',
+                          gcs=False)
 shared_embeddings = SharedEmbeddingSpec(name='product_id',
                                         univalent=['product_id'],
                                         multivalent=['touched_product_id', 'liked_product_id', 'disliked_product_id'])
 cg_data = CandidateGenerationData(univalent_features=['user_id'], shared_features=[shared_embeddings])
-cg_data.load_train_data(cg_storage, gcs=False)
+cg_data.load_train_data(cg_storage)
 
 # begin model construction
 stdout.write('DEBUG: Building model inputs ... \n')
@@ -40,7 +40,6 @@ stdout.write('DEBUG: Listing available CPUs/GPUs ... \n')
 stdout.write(str(device_lib.list_local_devices()))
 
 stdout.write('DEBUG: Fitting model ... \n')
-from tensorflow.keras.models import load_model
 tensorboard_callback = TensorBoard(log_dir=os.path.join(cg_storage.local_path, 'logs'), histogram_freq=1,
                                    write_images=True)
 keras_callbacks = [tensorboard_callback]

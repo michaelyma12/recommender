@@ -18,18 +18,21 @@ def upload_local_directory_to_gcs(local_path, bucket, gcs_path):
 
 class ModelStorage(object):
 
-    def __init__(self, bucket_name, model_path):
+    def __init__(self, bucket_name, model_path, gcs=True):
         """manage files across cloud & local storage"""
         self.bucket_name = bucket_name
         self.bucket_uri = 'gs://{}'.format(bucket_name)
         self.model_path = model_path
         self.local_path = model_path
-        self.storage_client = storage.Client()
-        self.storage_bucket = self.storage_client.get_bucket(bucket_name)
+        self.gcs = gcs
 
-    def load_pickle(self, path, gcs=True):
-        """read pickle file from google cloud storage or local storage"""
         if gcs:
+            self.storage_client = storage.Client()
+            self.storage_bucket = self.storage_client.get_bucket(bucket_name)
+
+    def load_pickle(self, path):
+        """read pickle file from google cloud storage or local storage"""
+        if self.gcs:
             return loads(self.storage_bucket.blob(os.path.join(self.model_path, path)).download_as_string())
         else:
             return load(open(os.path.join(self.local_path, path), 'rb'))

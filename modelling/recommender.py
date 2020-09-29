@@ -201,29 +201,32 @@ class CandidateGenerationData(RecommenderData):
                          univalent_features=univalent_features, multivalent_features=multivalent_features,
                          shared_features=shared_features)
 
-    def load_train_data(self, model_storage, gcs=True):
+    def load_train_data(self, model_storage):
         """load data"""
-        self.feature_indices = model_storage.load_pickle('feature_indices.pkl', gcs=gcs)
-        self.feature_types = model_storage.load_pickle('feature_types.pkl', gcs=gcs)
-        self.holdout_types = model_storage.load_pickle('holdout_types.pkl', gcs=gcs)
-        self.embedding_max_values = model_storage.load_pickle('embedding_max_values.pkl', gcs=gcs)
+        self.feature_indices = model_storage.load_pickle('feature_indices.pkl')
+        self.feature_types = model_storage.load_pickle('feature_types.pkl')
+        self.holdout_types = model_storage.load_pickle('holdout_types.pkl')
+        self.embedding_max_values = model_storage.load_pickle('embedding_max_values.pkl')
         self.embedding_dimensions = dict([(key, 20) for key, value in self.embedding_max_values.items()])
 
         stdout.write('DEBUG: Loading holdout frame and categorical encoders ... \n')
-        self.user_encoder = model_storage.load_pickle('user_id_encoder.pkl', gcs=gcs)
-        self.product_encoder = model_storage.load_pickle('product_id_encoder.pkl', gcs=gcs)
+        self.user_encoder = model_storage.load_pickle('user_id_encoder.pkl')
+        self.product_encoder = model_storage.load_pickle('product_id_encoder.pkl')
         self.holdout_frame = self.fit_feature_types(
             pd.read_csv(os.path.join(model_storage.bucket_uri, model_storage.model_path, 'holdout.csv')),
             self.holdout_types
-        ) if gcs else self.fit_feature_types(pd.read_csv(os.path.join(model_storage.local_path, 'holdout.csv')),
-                                             self.holdout_types)
+        ) if model_storage.gcs else self.fit_feature_types(
+            pd.read_csv(os.path.join(model_storage.local_path, 'holdout.csv')), self.holdout_types
+        )
 
         stdout.write('DEBUG: Loading train and validation dataframes ... \n')
-        train_df = pd.read_csv(os.path.join(model_storage.bucket_uri, model_storage.model_path, 'train.csv')) if gcs else \
+        train_df = pd.read_csv(os.path.join(model_storage.bucket_uri, model_storage.model_path, 'train.csv')) if\
+            model_storage.gcs else \
             pd.read_csv(os.path.join(model_storage.local_path, 'train.csv'))
         train_matrix = self.fit_feature_types(train_df, self.feature_types).values
 
-        val_df = pd.read_csv(os.path.join(model_storage.bucket_uri, model_storage.model_path, 'validation.csv')) if gcs \
+        val_df = pd.read_csv(os.path.join(model_storage.bucket_uri, model_storage.model_path, 'validation.csv')) if\
+            model_storage.gcs \
             else pd.read_csv(os.path.join(model_storage.local_path, 'validation.csv'))
         val_matrix = self.fit_feature_types(val_df, self.feature_types).values
 
