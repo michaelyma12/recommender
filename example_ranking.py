@@ -1,21 +1,10 @@
-import sys
-sys.path.append('/Users/michaelma/rush/recommender')
-
-from modelling.transformations import *
-from modelling.nn_utils import *
 from modelling.recommender import *
-from dataclasses import dataclass
-from typing import List
-from tensorflow.keras.callbacks import TensorBoard
 from pickle import load
-from sklearn.metrics import accuracy_score, classification_report
 
 import pandas as pd
-import ml_metrics
-import tensorflow as tf
 import os
 
-
+# THIS SCRIPT IS STILL A WORK IN PROGRESS
 # select sample for model
 model_dir = 'models/luxury-beauty'
 ranking_dir = os.path.join(model_dir, 'ranking')
