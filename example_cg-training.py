@@ -20,6 +20,7 @@ from modelling.recommender import *
 from modelling.data_utils import *
 from modelling.evaluation import *
 
+
 def main():
     # load cloud storage, configure training and validation matrices
     stdout.write('DEBUG: Reading data from google cloud storage ...\n')
@@ -39,8 +40,6 @@ def main():
     stdout.write(str(device_lib.list_local_devices()))
 
     stdout.write('DEBUG: Fitting model ... \n')
-    from tensorflow.keras.models import load_model
-
     tensorboard_callback = TensorBoard(log_dir=os.path.join(cg_storage.local_path, 'logs'), histogram_freq=1,
                                        write_images=True)
     keras_callbacks = [tensorboard_callback]
@@ -65,6 +64,7 @@ def main():
     k = int(len(cg_data.product_encoder.values()) / 50)
     mean_avg_p, avg_p_frame = candidate_generator.map_at_k(k=k)
     stdout.write('Mean Average Precision @ ' + str(k) + ': ' + str(mean_avg_p) + '\n')
+
 
 if __name__ == "__main__":
     main()
